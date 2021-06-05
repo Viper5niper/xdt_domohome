@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\Luz as Luz;
+
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use App\Includes\ValidationRules as ValidationRules;
@@ -18,7 +20,7 @@ class LucesController {
         $this->logger = $depLogger;
         $this->db = $depDB;
         $this->validator = $depValidator;
-        $this->table = $this->db->table('todo');
+        $this->table = $this->db->table('luces');
     }
     
     // POST /luces/{id}/{orden}
@@ -31,8 +33,12 @@ class LucesController {
 
         $arrLuces = ["LG","LP","LA","LB","LS","LC","LE"];
 
+        $luz = Luz::where('luz_key',$args['id'])->first();
+
         //Vemos si la luz solicitada se encuentra entre las opciones disponibles
-        if(!in_array($args['id'], $arrLuces)) $errors = ['Luz escogida no existe'];
+        //if(!in_array($args['id'], $arrLuces)) $errors = ['Luz escogida no existe'];
+
+        if(!$luz) $errors = ['Luz escogida no existe'];
 
         if($orden !== "E" && $orden !== "A") $errors = ['Orden invalida'];
 
@@ -45,15 +51,18 @@ class LucesController {
         {   
             //Indicamos al arduino que encienda la luz escogida
             $writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
-            //$writtenBytes = fputs($fp, 'LGA');
             
             if($orden == "E"){
+                $luz->encendida = true;
                 $toggle = $args['id'] . "/A";
                 $msg = "Luz encendida";
             }else{
+                $luz->encendida = false;
                 $toggle = $args['id'] . "/E";
                 $msg = "Luz apagada";
             }
+
+            $luz->save();
 
             return $response->withJson([
                 'error' => false,
@@ -87,7 +96,7 @@ class LucesController {
         {   
             //Indicamos al arduino que enciendan todas las luces
             $writtenBytes = fputs($fp, "LT". $orden);    //Agregamos la orden
-
+            
             if($orden == "E"){
                 $toggle = "A";
                 $msg = "Luces encendidas";
@@ -100,6 +109,57 @@ class LucesController {
                 'error' => false,
                 'message' => $msg,
                 'payload' => "LT" . $orden,
+                'siguiente' => $toggle
+            ], 200);
+        }
+        else{
+            return $response->withJson([
+                'error' => true,
+                'message' => "error al encender",
+                'log' => $errors
+            ], 400);
+        }
+    }
+
+
+    // POST /luces/{id}/{orden}
+    public function programarLuz(Request $request, Response $response, $args) {
+        $this->logger->addInfo('POST /luces/'.$args['id'].'/'.$args['orden']);
+        $user = $request->getAttribute('user');
+        $luz = $args['id'];
+        $orden = $args['orden'];
+        $errors = [];
+
+        $arrLuces = ["LG","LP","LA","LB","LS","LC","LE"];
+
+        //Vemos si la luz solicitada se encuentra entre las opciones disponibles
+        if(!in_array($args['id'], $arrLuces)) $errors = ['Luz escogida no existe'];
+
+        if($orden !== "E" && $orden !== "A") $errors = ['Orden invalida'];
+
+        exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        $fp = @fopen ("COM2", "w+");
+
+        if (!$fp) $errors = ["Puerto serial no accesible"];
+
+        if(!$errors)
+        {   
+            $writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden           
+            
+            //$writtenBytes = fputs($fp, 'LGA');
+            
+            if($orden == "E"){
+                $toggle = $args['id'] . "/A";
+                $msg = "Se encendera en 10s";
+            }else{
+                $toggle = $args['id'] . "/E";
+                $msg = "Se apagara en 10s";
+            }
+
+            return $response->withJson([
+                'error' => false,
+                'message' => $msg,
+                'payload' => $args['id'] . $orden,
                 'siguiente' => $toggle
             ], 200);
         }

@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\Cerrojo as Cerrojo;
+
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use App\Includes\ValidationRules as ValidationRules;
@@ -18,7 +20,7 @@ class CerrojosController {
         $this->logger = $depLogger;
         $this->db = $depDB;
         $this->validator = $depValidator;
-        $this->table = $this->db->table('todo');
+        $this->table = $this->db->table('cerrojos');
     }
     
     // POST /luces/{id}/{orden}
@@ -31,8 +33,12 @@ class CerrojosController {
 
         $arrCerrojos = ["CE","CP","CG"];
 
+        $cerrojo = Cerrojo::where('cerr_key',$args['id'])->first();
+
         //Vemos si la luz solicitada se encuentra entre las opciones disponibles
-        if(!in_array($args['id'], $arrCerrojos)) $errors = ['Puerta escogida no existe'];
+        //if(!in_array($args['id'], $arrCerrojos)) $errors = ['Puerta escogida no existe'];
+
+        if(!$cerrojo) $errors = ['Puerta escogida no existe'];
 
         if($orden !== "E" && $orden !== "A" && $orden !== "I") $errors = ['Orden invalida'];
 
@@ -48,15 +54,20 @@ class CerrojosController {
             //$writtenBytes = fputs($fp, 'CPE');
             
             if($orden == "E"){
+                $cerrojo->encendida = true;
                 $toggle = $args['id'] . "/A";
                 $msg = "Puerta abierta";
             }else if($orden == "A"){
+                $cerrojo->encendida = false;
                 $toggle = $args['id'] . "/E";
                 $msg = "Puerta cerrada";
             }else if($orden == "I"){
+                $cerrojo->encendida = false;
                 $toggle = $args['id'] . "/I";
                 $msg = "Pase adelante";
-            }
+            }  
+            
+            $cerrojo->save();
 
             return $response->withJson([
                 'error' => false,

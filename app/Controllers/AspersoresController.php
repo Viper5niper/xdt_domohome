@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\Aspersor as Aspersor;
+
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use App\Includes\ValidationRules as ValidationRules;
@@ -18,7 +20,7 @@ class AspersoresController {
         $this->logger = $depLogger;
         $this->db = $depDB;
         $this->validator = $depValidator;
-        $this->table = $this->db->table('todo');
+        $this->table = $this->db->table('aspersores');
     }
     
     // POST /asp/{id}/{orden}
@@ -30,9 +32,11 @@ class AspersoresController {
         $errors = [];
 
         $arrAspersores = ["AP"];
+        
+        $aspersor = Aspersor::where('asp_key',$args['id'])->first();
 
         //Vemos si la luz solicitada se encuentra entre las opciones disponibles
-        if(!in_array($args['id'], $arrAspersores)) $errors = ['Puerta escogida no existe'];
+        if(!$aspersor) $errors = ['Aspersor escogido no existe'];
 
         if($orden !== "R" && $orden !== "L" && $orden !== "A") $errors = ['Orden invalida'];
 
@@ -48,15 +52,21 @@ class AspersoresController {
             //$writtenBytes = fputs($fp, 'CPE');
             
             if($orden == "R"){
+                $aspersor->encendida = true;
                 $toggle = $args['id'] . "/A";
                 $msg = "Aspersores en sentido derecho";
             }else if($orden == "L"){
+                $aspersor->encendida = true;
                 $toggle = $args['id'] . "/A";
                 $msg = "Aspersores en sentido izquierdo";
             }else if($orden == "A"){
+                $aspersor->encendida = false;
                 $toggle = $args['id'] . "/R";
                 $msg = "Aspersores apagados";
             }
+
+            $aspersor->direccion = $orden;
+            $aspersor->save();
 
             return $response->withJson([
                 'error' => false,

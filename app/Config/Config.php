@@ -29,7 +29,7 @@ class Config {
     public function auth() {
         return [
             'secret' => 'D0M0H0M3',
-            'expires' => 20000, // in minutes
+            'expires' => 2000000, // in minutes
             'hash' => PASSWORD_DEFAULT,
             'jwt' => 'HS256'
         ];

@@ -2,6 +2,8 @@
 
 namespace App\Controllers;
 
+use App\Models\Vent as Vent;
+
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use App\Includes\ValidationRules as ValidationRules;
@@ -18,7 +20,7 @@ class VentilacionesController {
         $this->logger = $depLogger;
         $this->db = $depDB;
         $this->validator = $depValidator;
-        $this->table = $this->db->table('todo');
+        $this->table = $this->db->table('ventiladores');
     }
     
     // POST /vents/{id}/{orden}
@@ -31,8 +33,10 @@ class VentilacionesController {
 
         $arrVent = ["VA","VB"];
 
+        $vent = Vent::where('vent_key',$args['id'])->first();
+
         //Vemos si la ventilacion solicitada se encuentra entre las opciones disponibles
-        if(!in_array($args['id'], $arrVent)) $errors = ['Ventilacion escogida no existe'];
+        if(!$vent) $errors = ['Ventilacion escogida no existe'];
 
         if($orden !== "E" && $orden !== "A") $errors = ['Orden invalida'];
 
@@ -48,12 +52,16 @@ class VentilacionesController {
             //$writtenBytes = fputs($fp, 'LGA');
             
             if($orden == "E"){
+                $vent->encendida = true;
                 $toggle = $args['id'] . "/A";
                 $msg = "Ventilacion encendida";
             }else{
+                $vent->encendida = false;
                 $toggle = $args['id'] . "/E";
                 $msg = "Ventilacion apagada";
             }
+
+            $vent->save();
 
             return $response->withJson([
                 'error' => false,
