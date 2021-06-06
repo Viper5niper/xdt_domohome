@@ -23,7 +23,31 @@ class CerrojosController {
         $this->table = $this->db->table('cerrojos');
     }
     
-    // POST /luces/{id}/{orden}
+    public function getStates(Request $request, Response $response, $args) {
+        $this->logger->addInfo('GET /luces');
+        $user = $request->getAttribute('user');
+        $errors = [];
+
+        $cerr = Cerrojo::get();
+
+        if(!$errors)
+        {   
+            return $response->withJson([
+                'error' => false,
+                'message' => 'Puertas obtenidas',
+                'data' => $cerr ? $cerr : []
+            ], 200);
+        }
+        else{
+            return $response->withJson([
+                'error' => true,
+                'message' => "error al encender",
+                'log' => $errors
+            ], 400);
+        }
+    }
+
+    // POST /cerr/{id}/{orden}
     public function controlCerrojo(Request $request, Response $response, $args) {
         $this->logger->addInfo('POST /puerta/'.$args['id'].'/'.$args['orden']);
         $user = $request->getAttribute('user');
@@ -33,7 +57,7 @@ class CerrojosController {
 
         $arrCerrojos = ["CE","CP","CG"];
 
-        $cerrojo = Cerrojo::where('cerr_key',$args['id'])->first();
+        $cerrojo = Cerrojo::where('dkey',$args['id'])->first();
 
         //Vemos si la luz solicitada se encuentra entre las opciones disponibles
         //if(!in_array($args['id'], $arrCerrojos)) $errors = ['Puerta escogida no existe'];

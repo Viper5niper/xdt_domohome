@@ -23,6 +23,31 @@ class VentilacionesController {
         $this->table = $this->db->table('ventiladores');
     }
     
+    //GET /vents
+    public function getStates(Request $request, Response $response, $args) {
+        $this->logger->addInfo('GET /vents');
+        $user = $request->getAttribute('user');
+        $errors = [];
+
+        $vents = Vent::get();
+
+        if(!$errors)
+        {   
+            return $response->withJson([
+                'error' => false,
+                'message' => 'vents obtenidas',
+                'data' => $vents ? $vents : []
+            ], 200);
+        }
+        else{
+            return $response->withJson([
+                'error' => true,
+                'message' => "error al obtener",
+                'log' => $errors
+            ], 400);
+        }
+    }
+
     // POST /vents/{id}/{orden}
     public function controlVent(Request $request, Response $response, $args) {
         $this->logger->addInfo('POST /vents/'.$args['id'].'/'.$args['orden']);
@@ -33,7 +58,7 @@ class VentilacionesController {
 
         $arrVent = ["VA","VB"];
 
-        $vent = Vent::where('vent_key',$args['id'])->first();
+        $vent = Vent::where('dkey',$args['id'])->first();
 
         //Vemos si la ventilacion solicitada se encuentra entre las opciones disponibles
         if(!$vent) $errors = ['Ventilacion escogida no existe'];

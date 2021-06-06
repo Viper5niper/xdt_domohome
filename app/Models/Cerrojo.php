@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Cerrojo extends Model {
     use SoftDeletes;
     protected $table = 'cerrojos';
-    protected $fillable = ['cerr_key', 'name','encendida']; // allow mass assignment
+    protected $fillable = ['dkey', 'name','encendida']; // allow mass assignment
     protected $hidden = ['deleted_at']; // hidden columns from select results
     protected $dates = ['deleted_at']; // the attributes that should be mutated to dates
     

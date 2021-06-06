@@ -40,6 +40,7 @@ class App {
             new \App\Routes\Cerrojos($this->app),
             new \App\Routes\Ventilaciones($this->app),
             new \App\Routes\Aspersores($this->app),
+            new \App\Routes\Eventos($this->app),
             new \App\Routes\User($this->app)
         ];
     }

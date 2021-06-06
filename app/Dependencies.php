@@ -63,6 +63,9 @@ class Dependencies {
         $this->container['\App\Controllers\AspersoresController'] = function($c) use ($app) {
             return new \App\Controllers\AspersoresController($c->get('logger'), $c->get('db'), $c->get('validator'));
         };
+        $this->container['\App\Controllers\EventosController'] = function($c) use ($app) {
+            return new \App\Controllers\EventosController($c->get('logger'), $c->get('db'), $c->get('validator'));
+        };
     }
     
     // Custom handlers
@@ -70,7 +73,7 @@ class Dependencies {
         // 404 custom response
         $this->container['notFoundHandler'] = function($c) {
             return function($request, $response) use ($c) {
-                return $c['response']->withJson(['errors' => 'Resource not found'], 404);
+                return $c['response']->withJson(['message' => 'No encontrado'], 404);
             };
         };
     }

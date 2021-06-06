@@ -23,6 +23,31 @@ class AspersoresController {
         $this->table = $this->db->table('aspersores');
     }
     
+    //GET /asp
+    public function getStates(Request $request, Response $response, $args) {
+        $this->logger->addInfo('GET /luces');
+        $user = $request->getAttribute('user');
+        $errors = [];
+
+        $asps = Aspersor::get();
+
+        if(!$errors)
+        {   
+            return $response->withJson([
+                'error' => false,
+                'message' => 'Puertas obtenidas',
+                'data' => $asps ? $asps : []
+            ], 200);
+        }
+        else{
+            return $response->withJson([
+                'error' => true,
+                'message' => "error al encender",
+                'log' => $errors
+            ], 400);
+        }
+    }
+
     // POST /asp/{id}/{orden}
     public function controlAspersor(Request $request, Response $response, $args) {
         $this->logger->addInfo('POST /puerta/'.$args['id'].'/'.$args['orden']);
@@ -33,12 +58,12 @@ class AspersoresController {
 
         $arrAspersores = ["AP"];
         
-        $aspersor = Aspersor::where('asp_key',$args['id'])->first();
+        $aspersor = Aspersor::where('dkey',$args['id'])->first();
 
         //Vemos si la luz solicitada se encuentra entre las opciones disponibles
         if(!$aspersor) $errors = ['Aspersor escogido no existe'];
 
-        if($orden !== "R" && $orden !== "L" && $orden !== "A") $errors = ['Orden invalida'];
+        if($orden !== "E" && $orden !== "L" && $orden !== "A") $errors = ['Orden invalida'];
 
         exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
         $fp = @fopen ("COM2", "w+");
@@ -51,7 +76,7 @@ class AspersoresController {
             $writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
             //$writtenBytes = fputs($fp, 'CPE');
             
-            if($orden == "R"){
+            if($orden == "E"){
                 $aspersor->encendida = true;
                 $toggle = $args['id'] . "/A";
                 $msg = "Aspersores en sentido derecho";

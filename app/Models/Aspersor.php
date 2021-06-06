@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Aspersor extends Model {
     use SoftDeletes;
     protected $table = 'aspersores';
-    protected $fillable = ['asp_key', 'name','encendida','direccion']; // allow mass assignment
+    protected $fillable = ['dkey', 'name','encendida','direccion']; // allow mass assignment
     protected $hidden = ['deleted_at']; // hidden columns from select results
     protected $dates = ['deleted_at']; // the attributes that should be mutated to dates
     

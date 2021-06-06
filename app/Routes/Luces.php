@@ -6,7 +6,7 @@ class Luces {
         $app->post('/luces/{id}/{orden}', '\App\Controllers\LucesController:controlLuz');
         $app->post('/lucestodas/{orden}', '\App\Controllers\LucesController:controlTodas');
         $app->post('/pluz/{id}/{orden}', '\App\Controllers\LucesController:programarLuz');
-        //$app->get('/todo/{id}', '\App\Controllers\TodoController:find');
+        $app->get('/luces', '\App\Controllers\LucesController:getStates');
         //$app->post('/todo', '\App\Controllers\TodoController:create');
         //$app->put('/todo/{id}', '\App\Controllers\TodoController:update');
         //$app->delete('/todo/{id}', '\App\Controllers\TodoController:delete');
