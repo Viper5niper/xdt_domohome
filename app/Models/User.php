@@ -11,6 +11,8 @@ class User extends Model {
     protected $fillable = ['username', 'password']; // for mass creation
     protected $hidden = ['password', 'deleted_at']; // hidden columns from select results
     protected $dates = ['deleted_at']; // the attributes that should be mutated to dates
+    protected $appends = ['Type'];
+
     public function categories() {
         return $this->hasMany('\App\Models\Category', 'user_id');
     }
@@ -19,6 +21,9 @@ class User extends Model {
     }
     public function setPasswordAttribute($pass){
         $this->attributes['password'] = password_hash($pass, \App\Config\Config::auth()['hash']);
+    }
+    public function getTypeAttribute(){
+        return "user";
     }
     public function tokenCreate() {
         $expires = new \DateTime("+".(\App\Config\Config::auth()['expires'])." minutes"); // token expiration

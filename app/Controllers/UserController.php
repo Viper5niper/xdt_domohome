@@ -42,14 +42,14 @@ class UserController {
                 'password' => $data['password']
             ]);
             return $response->withJson([
-                'success' => true,
+                'error' => true,
                 'id' => $newUser->id
             ], 200);
         } else {
             // Error occured
             return $response->withJson([
-                'success' => false,
-                'errors' => $errors
+                'error' => false,
+                'log' => $errors
             ], 400);
         }
     }
@@ -77,18 +77,36 @@ class UserController {
             $token = $user->tokenCreate();
             // return token
             return $response->withJson([
-                "success" => true,
-                "data" => [
-                    "token" => $token['token'],
-                    "expires" => $token['expires']
-                ]
+                "error" => false,
+                "message" => "Iniciaste sesion con exito",
+                "token" => $token['token'],
+                "expires" => $token['expires'],
+                "user" => $user
             ], 200);
         } else {
             // Error occured
             return $response->withJson([
-                'success' => false,
-                'errors' => $errors
+                'error' => true,
+                'message' => "error de sesion",
+                'log' => $errors
             ], 400);
         }
+    }
+
+    public function checkAuth(Request $request, Response $response) {
+        $this->logger->addInfo('GET /checkAuth');
+        $user = $request->getAttribute('user');
+
+        //var_dump($user);
+        
+        return $response->withHeader('Access-Control-Allow-Origin', '*')
+        ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+        ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')->withJson([
+            'error' => false,
+            'message' => "Bienvenido de vuelta",
+            'isAuth' => true, //necesario para el front end
+            'user' => $user
+        ], 200);;
+
     }
 }

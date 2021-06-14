@@ -34,12 +34,16 @@ class Middleware {
             "logger" => $this->container['logger'],
             "error" => function ($response, $arguments) {
                 return $response->withJson([
-                    'success' => false,
+                    'error' => true,
                     'errors' => $arguments["message"]
-                ], 401);
+                ], 401)
+                ->withHeader('Access-Control-Allow-Origin', '*')
+                ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+                ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
             },
             "before" => function ($request, $arguments) {
                 $user = \App\Models\User::find($arguments['decoded']['sub']);
+                //var_dump($user);
                 return $request->withAttribute("user", $user);
             }
         ]));
