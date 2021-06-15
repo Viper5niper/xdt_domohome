@@ -33,7 +33,7 @@ class VentilacionesController {
 
         if(!$errors)
         {   
-            return $response->withJson([
+            return $response->withJson([ 
                 'error' => false,
                 'message' => 'vents obtenidas',
                 'data' => $vents ? $vents : []
@@ -65,15 +65,15 @@ class VentilacionesController {
 
         if($orden !== "E" && $orden !== "A") $errors = ['Orden invalida'];
 
-        exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        $fp = @fopen ("COM2", "w+");
+        //exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        //$fp = @fopen ("COM2", "w+");
 
-        if (!$fp) $errors = ["Puerto serial no accesible"];
+        //if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   
             //Indicamos al arduino que encienda la ventilacion escogida
-            $writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
+            //$writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
             //$writtenBytes = fputs($fp, 'LGA');
             
             if($orden == "E"){
@@ -92,7 +92,8 @@ class VentilacionesController {
                 'error' => false,
                 'message' => $msg,
                 'payload' => $args['id'] . $orden,
-                'siguiente' => $toggle
+                'siguiente' => $toggle,
+                'newState' => $vent
             ], 200);
         }
         else{
