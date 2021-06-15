@@ -96,7 +96,8 @@ class LucesController {
                 'error' => false,
                 'message' => $msg,
                 'payload' => $args['id'] . $orden,
-                'siguiente' => $toggle
+                'siguiente' => $toggle,
+                'newState' => $luz
             ], 200);
         }
         else{
