@@ -49,8 +49,11 @@ class CerrojosController {
 
     // POST /cerr/{id}/{orden}
     public function controlCerrojo(Request $request, Response $response, $args) {
-        $this->logger->addInfo('POST /puerta/'.$args['id'].'/'.$args['orden']);
+        
         $user = $request->getAttribute('user');
+        $this->logger->addInfo('Interaccion de usuario '.$user->username.' con puerta '.$args['id'].'. Accion: '.$args['orden']);
+
+        $data = $request->getParsedBody();
         $luz = $args['id'];
         $orden = $args['orden'];
         $errors = [];
@@ -66,15 +69,23 @@ class CerrojosController {
 
         if($orden !== "E" && $orden !== "A" && $orden !== "I") $errors = ['Orden invalida'];
 
-        exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        $fp = @fopen ("COM2", "w+");
+        if(!$errors && $cerrojo->dkey == "CE" && !isset($data['pin'])) $errors ['este cerrojo requiere el pin de acceso'];
+        else if(isset($data['pin']) && $data['pin'] !== '1234'){
+            
+            $errors ['pin incorrecto'];
+            $this->logger->addWarning('Intento fallido de ingreso. Usuario: '.$user->username);
 
-        if (!$fp) $errors = ["Puerto serial no accesible"];
+        } 
+
+        // exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        // $fp = @fopen ("COM2", "w+");
+
+        // if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   
             //Indicamos al arduino que encienda la luz escogida
-            $writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
+            //$writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
             //$writtenBytes = fputs($fp, 'CPE');
             
             if($orden == "E"){

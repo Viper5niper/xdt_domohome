@@ -53,8 +53,10 @@ class LucesController {
 
     // POST /luces/{id}/{orden}
     public function controlLuz(Request $request, Response $response, $args) {
-        $this->logger->addInfo('POST /luces/'.$args['id'].'/'.$args['orden']);
+        
         $user = $request->getAttribute('user');
+        $this->logger->addInfo('Interaccion de usuario '.$user->username.' con Luz '.$args['id'].'. Accion: '.$args['orden']);
+
         $luz = $args['id'];
         $orden = $args['orden'];
         $errors = [];

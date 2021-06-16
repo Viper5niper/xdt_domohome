@@ -50,8 +50,10 @@ class AspersoresController {
 
     // POST /asp/{id}/{orden}
     public function controlAspersor(Request $request, Response $response, $args) {
-        $this->logger->addInfo('POST /puerta/'.$args['id'].'/'.$args['orden']);
+        
         $user = $request->getAttribute('user');
+        $this->logger->addInfo('Interaccion de usuario '.$user->username.' con aspersor '.$args['id'].'. Accion: '.$args['orden']);
+
         $luz = $args['id'];
         $orden = $args['orden'];
         $errors = [];
@@ -65,15 +67,15 @@ class AspersoresController {
 
         if($orden !== "E" && $orden !== "L" && $orden !== "A") $errors = ['Orden invalida'];
 
-        exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        $fp = @fopen ("COM2", "w+");
+        //exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        //$fp = @fopen ("COM2", "w+");
 
-        if (!$fp) $errors = ["Puerto serial no accesible"];
+        //if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   
             //Indicamos al arduino que encienda la luz escogida
-            $writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
+            //$writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
             //$writtenBytes = fputs($fp, 'CPE');
             
             if($orden == "E"){
@@ -86,7 +88,7 @@ class AspersoresController {
                 $msg = "Aspersores en sentido izquierdo";
             }else if($orden == "A"){
                 $aspersor->encendida = false;
-                $toggle = $args['id'] . "/R";
+                $toggle = $args['id'] . "/E";
                 $msg = "Aspersores apagados";
             }
 
@@ -97,7 +99,8 @@ class AspersoresController {
                 'error' => false,
                 'message' => $msg,
                 'payload' => $args['id'] . $orden,
-                'siguiente' => $toggle
+                'siguiente' => $toggle,
+                'newState' => $aspersor
             ], 200);
         }
         else{

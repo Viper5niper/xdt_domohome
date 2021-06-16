@@ -50,8 +50,10 @@ class VentilacionesController {
 
     // POST /vents/{id}/{orden}
     public function controlVent(Request $request, Response $response, $args) {
-        $this->logger->addInfo('POST /vents/'.$args['id'].'/'.$args['orden']);
+        
         $user = $request->getAttribute('user');
+        $this->logger->addInfo('Interaccion de usuario '.$user->username.' con ventilacion '.$args['id'].'. Accion: '.$args['orden']);
+
         $ventilacion = $args['id'];
         $orden = $args['orden'];
         $errors = [];
