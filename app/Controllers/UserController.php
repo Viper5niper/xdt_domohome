@@ -112,7 +112,7 @@ class UserController {
 
     public function getLog(Request $request, Response $response) {
         $this->logger->addInfo('GET /getLog');
-        $user = $request->getAttribute('user');
+        //$user = $request->getAttribute('user');
  
         $file = "../../logs/app.log";
 
