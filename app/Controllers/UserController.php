@@ -117,7 +117,15 @@ class UserController {
         $file = "../../logs/app.log";
 
         echo $file;
-        echo file_exists($file);
+
+
+        if(file_exists($file)){
+
+            echo 'siiiiii';
+        }else{
+
+            echo 'nooooooo';
+        } 
         echo is_readable($file);
 
         return $response;
