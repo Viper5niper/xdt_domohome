@@ -114,7 +114,7 @@ class UserController {
         $this->logger->addInfo('GET /getLog');
         //$user = $request->getAttribute('user');
  
-        $file = "../../logs/app.log";
+        $file = __DIR__ . "/../../logs/app.log";
 
         echo $file;
 
