@@ -116,6 +116,12 @@ class UserController {
  
         $file = "../../logs/app.log";
 
+        echo $file;
+        echo is_file($file);
+
+        return $response;
+
+        /*
         $response = $response->withHeader('Content-Description', 'File Transfer')
             ->withHeader('Content-Type', 'application/octet-stream')
             ->withHeader('Content-Disposition', 'attachment;filename="' . basename($file) . '"')
@@ -127,7 +133,7 @@ class UserController {
         readfile($file);
 
         return $response;
-    
+        /**/
 
     }
     
