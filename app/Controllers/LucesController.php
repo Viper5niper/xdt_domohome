@@ -118,10 +118,10 @@ class LucesController {
         $orden = $args['orden'];
         $errors = [];
 
-        exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        $fp = @fopen ("COM2", "w+");
+        //exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        // $fp = @fopen ("COM2", "w+");
 
-        if (!$fp) $errors = ["Puerto serial no accesible"];
+        // if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   
@@ -130,7 +130,10 @@ class LucesController {
             //Invertimos el estado de las luces
             DB::table('luces')->where('encendida', '=', !$aux)->update(array('encendida' => $aux));
             //Indicamos al arduino que enciendan todas las luces
-            $writtenBytes = fputs($fp, "LT". $orden);    //Agregamos la orden
+            
+            $luces = Luz::get();
+
+            //$writtenBytes = fputs($fp, "LT". $orden);    //Agregamos la orden
             
             if($orden == "E"){
                 $toggle = "A";
@@ -144,7 +147,8 @@ class LucesController {
                 'error' => false,
                 'message' => $msg,
                 'payload' => "LT" . $orden,
-                'siguiente' => $toggle
+                'siguiente' => $toggle,
+                'newState' => $luces
             ], 200);
         }
         else{

@@ -7,6 +7,8 @@ use App\Models\Vent as Vent;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use App\Includes\ValidationRules as ValidationRules;
+
+use Illuminate\Database\Capsule\Manager as DB;
 //TODO: Guardar las fechas de encendido y apagado de las vents para hacer calculos de consumo de energia
 class VentilacionesController {
     private $logger;
@@ -114,15 +116,19 @@ class VentilacionesController {
         $orden = $args['orden'];
         $errors = [];
 
-        exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        $fp = @fopen ("COM2", "w+");
+        // exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        // $fp = @fopen ("COM2", "w+");
 
-        if (!$fp) $errors = ["Puerto serial no accesible"];
+        // if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   
+            $aux = $orden === 'E';//Convertimos a booleano ( E = true, A = false)
             //Indicamos al arduino que enciendan todas las vents
-            $writtenBytes = fputs($fp, "VT". $orden);    //Agregamos la orden
+            //$writtenBytes = fputs($fp, "VT". $orden);    //Agregamos la orden
+            DB::table('ventiladores')->where('encendida', '=', !$aux)->update(array('encendida' => $aux));
+
+            $vents = Vent::get();
 
             if($orden == "E"){
                 $toggle = "A";
@@ -136,7 +142,8 @@ class VentilacionesController {
                 'error' => false,
                 'message' => $msg,
                 'payload' => "VT" . $orden,
-                'siguiente' => $toggle
+                'siguiente' => $toggle,
+                'newState' => $vents
             ], 200);
         }
         else{
