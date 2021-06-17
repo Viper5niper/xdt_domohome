@@ -113,8 +113,10 @@ class LucesController {
 
     // POST /lucestodas/{orden}
     public function controlTodas(Request $request, Response $response, $args) {
-        $this->logger->addInfo('POST /lucestodas/'.$args['orden']);
+        
         $user = $request->getAttribute('user');
+        $this->logger->addInfo('Interaccion de usuario '.$user->username.' con todas las luces. Accion: '.$args['orden']);
+
         $orden = $args['orden'];
         $errors = [];
 
