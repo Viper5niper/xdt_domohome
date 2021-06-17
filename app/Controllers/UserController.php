@@ -109,4 +109,26 @@ class UserController {
         ], 200);;
 
     }
+
+    public function getLog(Request $request, Response $response) {
+        $this->logger->addInfo('GET /getLog');
+        $user = $request->getAttribute('user');
+ 
+        $file = "../../logs/app.log";
+
+        $response = $response->withHeader('Content-Description', 'File Transfer')
+            ->withHeader('Content-Type', 'application/octet-stream')
+            ->withHeader('Content-Disposition', 'attachment;filename="' . basename($file) . '"')
+            ->withHeader('Expires', '0')
+            ->withHeader('Cache-Control', 'must-revalidate')
+            ->withHeader('Pragma', 'public')
+            ->withHeader('Content-Length', filesize($file));
+
+        readfile($file);
+
+        return $response;
+    
+
+    }
+    
 }
