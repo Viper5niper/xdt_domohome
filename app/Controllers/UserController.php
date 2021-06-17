@@ -116,21 +116,6 @@ class UserController {
  
         $file = __DIR__ . "/../../logs/app.log";
 
-        echo $file;
-
-
-        if(file_exists($file)){
-
-            echo 'siiiiii';
-        }else{
-
-            echo 'nooooooo';
-        } 
-        echo is_readable($file);
-
-        return $response;
-
-        /*
         $response = $response->withHeader('Content-Description', 'File Transfer')
             ->withHeader('Content-Type', 'application/octet-stream')
             ->withHeader('Content-Disposition', 'attachment;filename="' . basename($file) . '"')
