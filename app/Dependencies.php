@@ -16,7 +16,7 @@ class Dependencies {
     function dependencies() {
         // Monolog
         $this->container['logger'] = function($c) {
-            $logger = new \Monolog\Logger('myLogger');
+            $logger = new \Monolog\Logger('DOMOHOME');
             $file_handler = new \Monolog\Handler\StreamHandler('../logs/app.log');
             $logger->pushHandler($file_handler);
             return $logger;

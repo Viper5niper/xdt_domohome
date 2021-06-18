@@ -73,7 +73,7 @@ class CerrojosController {
         if(!$errors && $cerrojo->dkey == "CE" && !isset($data['pin'])) $errors ['este cerrojo requiere el pin de acceso'];
         else if(isset($data['pin']) && $data['pin'] !== '1234'){
             
-            $errors ['pin incorrecto'];
+            $errors = ['pin incorrecto'];
             $this->logger->addWarning('Intento fallido de ingreso. Usuario: '.$user->username);
 
         } 
