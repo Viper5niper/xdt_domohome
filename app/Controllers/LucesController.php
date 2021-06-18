@@ -27,8 +27,9 @@ class LucesController {
     }
     
     public function getStates(Request $request, Response $response, $args) {
-        $this->logger->addInfo('GET /luces');
+        
         $user = $request->getAttribute('user');
+        $this->logger->addInfo('Interaccion de usuario '.$user->username.', obtuvo el estado de todas las luces');
         $errors = [];
 
         $luces = Luz::get();
@@ -164,8 +165,8 @@ class LucesController {
 
     // POST /pluz/{id}/{orden}
     public function programarLuz(Request $request, Response $response, $args) {
-        $this->logger->addInfo('POST /luces/'.$args['id'].'/'.$args['orden']);
         $user = $request->getAttribute('user');
+        $this->logger->addInfo('Usuario '.$user->username.' programo la luz '.$args['id'].'. Accion: '.$args['orden']);
         $luz = $args['id'];
         $orden = $args['orden'];
         $data = $request->getParsedBody();

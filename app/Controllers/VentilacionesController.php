@@ -27,8 +27,8 @@ class VentilacionesController {
     
     //GET /vents
     public function getStates(Request $request, Response $response, $args) {
-        $this->logger->addInfo('GET /vents');
         $user = $request->getAttribute('user');
+        $this->logger->addInfo('Interaccion de usuario '.$user->username.', obtuvo el estado de todas las ventilaciones');
         $errors = [];
 
         $vents = Vent::get();

@@ -24,7 +24,7 @@ class UserController {
     // POST /users
     // Create user
     public function create(Request $request, Response $response) {
-        $this->logger->addInfo('POST /users');
+        $this->logger->addInfo('Creacion de usuario');
         $data = $request->getParsedBody();
         $errors = [];
         // The validate method returns the validator instance
@@ -56,7 +56,7 @@ class UserController {
     
     // POST /users/login
     public function login(Request $request, Response $response) {
-        $this->logger->addInfo('POST /users/login');
+        
         $data = $request->getParsedBody();
         $errors = [];
         $validator = $this->validator->validate($request, ValidationRules::authPost());
@@ -66,13 +66,16 @@ class UserController {
         }
         // validate username
         if (!$errors && !($user = User::where(['username' => $data['username']])->first())) {
-            $errors[] = 'Username invalid';
+            $errors[] = 'Usuario invalido';
         }
         // validate password
         if (!$errors && !password_verify($data['password'], $user->password)) {
-            $errors[] = 'Password invalid';
+            $this->logger->addWarning('Inicio de sesion fallido, user: '.$user->username);
+            $errors[] = 'Contraseña invalida';
         }
         if (!$errors) {
+
+            $this->logger->addInfo('Inicio de sesion exitoso, user: '.$user->username);
             // No errors, generate JWT
             $token = $user->tokenCreate();
             // return token
@@ -94,8 +97,8 @@ class UserController {
     }
 
     public function checkAuth(Request $request, Response $response) {
-        $this->logger->addInfo('GET /checkAuth');
         $user = $request->getAttribute('user');
+        $this->logger->addInfo('Usuario '.$user->username.' reanudo su sesion');
 
         //var_dump($user);
         
@@ -111,7 +114,7 @@ class UserController {
     }
 
     public function getLog(Request $request, Response $response) {
-        $this->logger->addInfo('GET /getLog');
+        //$this->logger->addInfo('GET /getLog');
         //$user = $request->getAttribute('user');
  
         $file = __DIR__ . "/../../logs/app.log";

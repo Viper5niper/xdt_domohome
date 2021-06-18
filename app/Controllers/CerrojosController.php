@@ -24,8 +24,9 @@ class CerrojosController {
     }
     
     public function getStates(Request $request, Response $response, $args) {
-        $this->logger->addInfo('GET /luces');
+
         $user = $request->getAttribute('user');
+        $this->logger->addInfo('Interaccion de usuario '.$user->username.', obtuvo el estado de todas las puertas');
         $errors = [];
 
         $cerr = Cerrojo::get();
@@ -108,7 +109,8 @@ class CerrojosController {
                 'error' => false,
                 'message' => $msg,
                 'payload' => $args['id'] . $orden,
-                'siguiente' => $toggle
+                'siguiente' => $toggle,
+                'newState' => $cerrojo
             ], 200);
         }
         else{

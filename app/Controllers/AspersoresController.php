@@ -25,8 +25,9 @@ class AspersoresController {
     
     //GET /asp
     public function getStates(Request $request, Response $response, $args) {
-        $this->logger->addInfo('GET /luces');
+
         $user = $request->getAttribute('user');
+        $this->logger->addInfo('Interaccion de usuario '.$user->username.', obtuvo el estado de todos los aspersores');
         $errors = [];
 
         $asps = Aspersor::get();
