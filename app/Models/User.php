@@ -13,12 +13,6 @@ class User extends Model {
     protected $dates = ['deleted_at']; // the attributes that should be mutated to dates
     protected $appends = ['Type'];
 
-    public function categories() {
-        return $this->hasMany('\App\Models\Category', 'user_id');
-    }
-    public function todos() {
-        return $this->hasMany('\App\Models\Todo', 'user_id');
-    }
     public function setPasswordAttribute($pass){
         $this->attributes['password'] = password_hash($pass, \App\Config\Config::auth()['hash']);
     }

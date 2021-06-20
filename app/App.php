@@ -34,8 +34,6 @@ class App {
     
     private function routes() {
         return [
-            new \App\Routes\Categories($this->app),
-            new \App\Routes\Todo($this->app),
             new \App\Routes\Luces($this->app),
             new \App\Routes\Cerrojos($this->app),
             new \App\Routes\Ventilaciones($this->app),
