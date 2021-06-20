@@ -61,8 +61,6 @@ class VentilacionesController {
         $orden = $args['orden'];
         $errors = [];
 
-        $arrVent = ["VA","VB"];
-
         $vent = Vent::where('dkey',$args['id'])->first();
 
         //Vemos si la ventilacion solicitada se encuentra entre las opciones disponibles
@@ -70,16 +68,16 @@ class VentilacionesController {
 
         if($orden !== "E" && $orden !== "A") $errors = ['Orden invalida'];
 
-        //exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        //$fp = @fopen ("COM2", "w+");
+        exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        $fp = @fopen ("COM2", "w+");
 
-        //if (!$fp) $errors = ["Puerto serial no accesible"];
+        if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   
             //Indicamos al arduino que encienda la ventilacion escogida
-            //$writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
-            //$writtenBytes = fputs($fp, 'LGA');
+            $writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
+
             
             if($orden == "E"){
                 $vent->encendida = true;
@@ -117,16 +115,16 @@ class VentilacionesController {
         $orden = $args['orden'];
         $errors = [];
 
-        // exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        // $fp = @fopen ("COM2", "w+");
+        exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        $fp = @fopen ("COM2", "w+");
 
-        // if (!$fp) $errors = ["Puerto serial no accesible"];
+        if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   
             $aux = $orden === 'E';//Convertimos a booleano ( E = true, A = false)
             //Indicamos al arduino que enciendan todas las vents
-            //$writtenBytes = fputs($fp, "VT". $orden);    //Agregamos la orden
+            $writtenBytes = fputs($fp, "VT". $orden);    //Agregamos la orden
             DB::table('ventiladores')->where('encendida', '=', !$aux)->update(array('encendida' => $aux));
 
             $vents = Vent::get();
@@ -175,10 +173,6 @@ class VentilacionesController {
         if(!isset($data['hora'])) $errors = ['por favor especifique una hora'];
 
         if(!$errors && !$this->is_timestamp($data['hora'])) $errors = ['ingrese un timestamp valido'];
-        //exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        //$fp = @fopen ("COM2", "w+");
-
-        //if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   

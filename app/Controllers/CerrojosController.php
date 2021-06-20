@@ -78,16 +78,15 @@ class CerrojosController {
 
         } 
 
-        // exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        // $fp = @fopen ("COM2", "w+");
+        exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        $fp = @fopen ("COM2", "w+");
 
-        // if (!$fp) $errors = ["Puerto serial no accesible"];
+        if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   
             //Indicamos al arduino que encienda la luz escogida
-            //$writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
-            //$writtenBytes = fputs($fp, 'CPE');
+            $writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
             
             if($orden == "E"){
                 $cerrojo->encendida = true;

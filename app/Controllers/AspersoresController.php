@@ -69,16 +69,15 @@ class AspersoresController {
 
         if($orden !== "E" && $orden !== "L" && $orden !== "A") $errors = ['Orden invalida'];
 
-        //exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        //$fp = @fopen ("COM2", "w+");
+        exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        $fp = @fopen ("COM2", "w+");
 
-        //if (!$fp) $errors = ["Puerto serial no accesible"];
+        if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   
             //Indicamos al arduino que encienda la luz escogida
-            //$writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
-            //$writtenBytes = fputs($fp, 'CPE');
+            $writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
             
             if($orden == "E"){
                 $aspersor->encendida = true;
@@ -132,10 +131,6 @@ class AspersoresController {
         if(!isset($data['hora'])) $errors = ['por favor especifique una hora'];
 
         if(!$errors && !$this->is_timestamp($data['hora'])) $errors = ['ingrese un timestamp valido'];
-        //exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        //$fp = @fopen ("COM2", "w+");
-
-        //if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   
