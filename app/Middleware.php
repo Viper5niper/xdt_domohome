@@ -30,6 +30,7 @@ class Middleware {
             "attribute" => "jwt",
             "path" => ["/"],
             "ignore" => ["/users","/getLog","/ev","/testev"],
+            "secure" => false,  //para evitar error por usar http
             "secret" => \App\Config\Config::auth()['secret'],
             "logger" => $this->container['logger'],
             "error" => function ($response, $arguments) {
