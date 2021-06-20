@@ -91,14 +91,18 @@ class CerrojosController {
             
             if($orden == "E"){
                 $cerrojo->encendida = true;
+                $cerrojo->abrir();
                 $toggle = $args['id'] . "/A";
                 $msg = "Puerta abierta";
             }else if($orden == "A"){
                 $cerrojo->encendida = false;
+                $cerrojo->cerrar();
                 $toggle = $args['id'] . "/E";
                 $msg = "Puerta cerrada";
             }else if($orden == "I"){
                 $cerrojo->encendida = false;
+                $cerrojo->abrir();
+                $cerrojo->cerrar();
                 $toggle = $args['id'] . "/I";
                 $msg = "Pase adelante";
             }  

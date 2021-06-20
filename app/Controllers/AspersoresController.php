@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Aspersor as Aspersor;
+use App\Models\Evento as Evento;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -113,6 +114,68 @@ class AspersoresController {
         }
     }
 
+    // POST /pluz/{id}/{orden}
+    public function programarAsp(Request $request, Response $response, $args) {
+        $user = $request->getAttribute('user');
+        $this->logger->addInfo('Usuario '.$user->username.' programo el aspersor '.$args['id'].'. Accion: '.$args['orden']);
+        $luz = $args['id'];
+        $orden = $args['orden'];
+        $data = $request->getParsedBody();
+        $errors = [];
+        
+        $luz = Aspersor::where('dkey',$args['id'])->first();
+        //Vemos si la luz solicitada se encuentra entre las opciones disponibles
+        if(!$luz) $errors = ['aspersor escogido no existe'];
+
+        if($orden !== "E" && $orden !== "A") $errors = ['Orden invalida'];
+
+        if(!isset($data['hora'])) $errors = ['por favor especifique una hora'];
+
+        if(!$errors && !$this->is_timestamp($data['hora'])) $errors = ['ingrese un timestamp valido'];
+        //exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        //$fp = @fopen ("COM2", "w+");
+
+        //if (!$fp) $errors = ["Puerto serial no accesible"];
+
+        if(!$errors)
+        {   
+            $newEvento = Evento::create([
+                'tabla' => 'aspersores',
+                'dkey' => $args['id'],
+                'orden' => $orden,
+                'payload' => $args['id'] . $orden,
+                'hora' => $data['hora']
+            ]);
+            
+            if($orden == "E"){
+                $toggle = $args['id'] . "/A";
+                $msg = "Se ha programado el encendido";
+            }else{
+                $toggle = $args['id'] . "/E";
+                $msg = "Se ha programado el apagado";
+            }
+
+            return $response->withJson([
+                'error' => false,
+                'message' => $msg,
+                'payload' => $args['id'] . $orden,
+                'siguiente' => $toggle
+            ], 200);
+        }
+        else{
+            return $response->withJson([
+                'error' => true,
+                'message' => "error al programar",
+                'log' => $errors
+            ], 400);
+        }
+    }
+    
+    function is_timestamp($timestamp) {
+        if(strtotime(date('d-m-Y H:i:s',$timestamp)) === (int)$timestamp) {
+            return $timestamp;
+        } else return false;
+    }
     /*
     public function controlTodos(Request $request, Response $response, $args) {
         $this->logger->addInfo('POST /puertastodas/'.$args['orden']);
