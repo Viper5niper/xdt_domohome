@@ -41,25 +41,20 @@ class EventosController {
         
             $desde = date("Y-m-d H:i:s");
             //Ejecutamos todos los eventos de los proximos 5 minutos
-            $hasta = date('Y-m-d H:i:s',strtotime('+5 minutes',strtotime($desde)));
+            $hasta = date('Y-m-d H:i:s',strtotime('+2 minutes',strtotime($desde)));
 
             $eventos = Evento::whereBetween('hora', array($desde, $hasta))->get();
 
             foreach ($eventos as $evento) {
-                //var_dump($evento->hora);
-
-                //no identificamos aspersores porque vale nionga pa que lado vayan
-                //Solo cambiar R por E
 
                 DB::table($evento->tabla)->where('dkey',$evento->dkey)  //Buscamos el dispositivo que se quiere editar
-                //editamos el estado (encendido o apagado)
                 ->update(['encendida' => $evento->orden === 'E']);//devolvera true o false dependiendo de si se cumple o no la condicion
                 //esto funciona porque ya se valido que la orden sea E o A a la hora de programar el evento
                 echo $evento->payload;
                 $writtenBytes = fputs($fp, $evento->payload);
 
                 if($evento->tabla === 'cerrojos') sleep(5); //Esperamos a que se abra la puerta
-                else sleep(1) //Esperamos a que se cumpla el delay del arduino
+                else sleep(1); //Esperamos a que se cumpla el delay del arduino
 
             }
 
@@ -79,6 +74,36 @@ class EventosController {
    
     }
     
+    public function getTemperature(Request $request, Response $response){
+
+
+        exec("mode COM3 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
+        $fp = @fopen ("COM3", "w+");
+
+        if (!$fp) $errors = ["Puerto serial no accesible"];
+
+        if(!$errors)
+        {   
+            //$buffer = fread($fp,128); 
+            //var_dump($buffer); //nos mete a un loop infinito
+            
+
+            return $response/*->withJson([
+                'error' => false,
+                'message' => 'Eventos ejecutados'
+            ], 200)/**/;
+
+        }
+        else{
+            return $response->withJson([
+                'error' => true,
+                'message' => "Temperatura no fue tomada",
+                'log' => $errors
+            ], 400);
+        }
+
+    }
+
     public function generateTestData(Request $request, Response $response, $args) {
         
 
