@@ -2,16 +2,14 @@
 
 namespace App\Controllers;
 
-use App\Models\Luz as Luz;
+use App\Models\Temperatura as Aspersor;
 use App\Models\Evento as Evento;
-
-use Illuminate\Database\Capsule\Manager as DB;
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 use App\Includes\ValidationRules as ValidationRules;
-//TODO: Guardar las fechas de encendido y apagado de las luces para hacer calculos de consumo de energia
-class LucesController {
+
+class TemperaturaController {
     private $logger;
     private $db;
     private $validator;
@@ -23,24 +21,24 @@ class LucesController {
         $this->logger = $depLogger;
         $this->db = $depDB;
         $this->validator = $depValidator;
-        $this->table = $this->db->table('luces');
+        $this->table = $this->db->table('aspersores');
     }
     
+    //GET /asp
     public function getStates(Request $request, Response $response, $args) {
-        
+
         $user = $request->getAttribute('user');
-        $this->logger->addInfo('Interaccion de usuario '.$user->username.', obtuvo el estado de todas las luces');
+        $this->logger->addInfo('Interaccion de usuario '.$user->username.', obtuvo el estado de todos los aspersores');
         $errors = [];
 
-        $luces = Luz::get();
+        $asps = Aspersor::get();
 
         if(!$errors)
         {   
-
             return $response->withJson([
                 'error' => false,
-                'message' => 'luces obtenidas',
-                'data' => $luces ? $luces : []
+                'message' => 'Puertas obtenidas',
+                'data' => $asps ? $asps : []
             ], 200);
         }
         else{
@@ -52,74 +50,24 @@ class LucesController {
         }
     }
 
-    // POST /luces/{id}/{orden}
-    public function controlLuz(Request $request, Response $response, $args) {
+    // POST /asp/{id}/{orden}
+    public function controlAspersor(Request $request, Response $response, $args) {
         
         $user = $request->getAttribute('user');
-        $this->logger->addInfo('Interaccion de usuario '.$user->username.' con Luz '.$args['id'].'. Accion: '.$args['orden']);
+        $this->logger->addInfo('Interaccion de usuario '.$user->username.' con aspersor '.$args['id'].'. Accion: '.$args['orden']);
 
         $luz = $args['id'];
         $orden = $args['orden'];
         $errors = [];
 
-        $arrLuces = ["LG","LP","LA","LB","LS","LC","LE"];
-
-        $luz = Luz::where('dkey',$args['id'])->first();
+        $arrAspersores = ["AP"];
+        
+        $aspersor = Aspersor::where('dkey',$args['id'])->first();
 
         //Vemos si la luz solicitada se encuentra entre las opciones disponibles
-        //if(!in_array($args['id'], $arrLuces)) $errors = ['Luz escogida no existe'];
+        if(!$aspersor) $errors = ['Aspersor escogido no existe'];
 
-        if(!$luz) $errors = ['Luz escogida no existe'];
-
-        if($orden !== "E" && $orden !== "A") $errors = ['Orden invalida'];
-
-        exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        $fp = @fopen ("COM2", "w+");
-
-        if (!$fp)$errors = [ "Puerto serial no accesible"];
-
-        if(!$errors)
-        {   
-            //Indicamos al arduino que encienda la luz escogida
-            $writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
-            
-            if($orden == "E"){
-                $luz->encendida = true;
-                $toggle = $args['id'] . "/A";
-                $msg = "Luz encendida";
-            }else{
-                $luz->encendida = false;
-                $toggle = $args['id'] . "/E";
-                $msg = "Luz apagada";
-            }
-
-            $luz->save();
-
-            return $response->withJson([
-                'error' => false,
-                'message' => $msg,
-                'payload' => $args['id'] . $orden,
-                'siguiente' => $toggle,
-                'newState' => $luz
-            ], 200);
-        }
-        else{
-            return $response->withJson([
-                'error' => true,
-                'message' => "error al encender",
-                'log' => $errors
-            ], 400);
-        }
-    }
-
-    // POST /lucestodas/{orden}
-    public function controlTodas(Request $request, Response $response, $args) {
-        
-        $user = $request->getAttribute('user');
-        $this->logger->addInfo('Interaccion de usuario '.$user->username.' con todas las luces. Accion: '.$args['orden']);
-
-        $orden = $args['orden'];
-        $errors = [];
+        if($orden !== "E" && $orden !== "L" && $orden !== "A") $errors = ['Orden invalida'];
 
         exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
         $fp = @fopen ("COM2", "w+");
@@ -128,70 +76,66 @@ class LucesController {
 
         if(!$errors)
         {   
-            $aux = $orden === 'E';//Convertimos a booleano ( E = true, A = false)
-
-            //Invertimos el estado de las luces
-            DB::table('luces')->where('encendida', '=', !$aux)->update(array('encendida' => $aux));
-            //Indicamos al arduino que enciendan todas las luces
-            
-            $luces = Luz::get();
-
-            $writtenBytes = fputs($fp, "LT". $orden);    //Agregamos la orden
+            //Indicamos al arduino que encienda la luz escogida
+            $writtenBytes = fputs($fp, $args['id'] . $orden);    //Agregamos la orden
             
             if($orden == "E"){
-                $toggle = "A";
-                $msg = "Luces encendidas";
-            }else{
-                $toggle = "E";
-                $msg = "Luces apagadas";
+                $aspersor->encendida = true;
+                $toggle = $args['id'] . "/A";
+                $msg = "Aspersores en sentido derecho";
+            }else if($orden == "L"){
+                $aspersor->encendida = true;
+                $toggle = $args['id'] . "/A";
+                $msg = "Aspersores en sentido izquierdo";
+            }else if($orden == "A"){
+                $aspersor->encendida = false;
+                $toggle = $args['id'] . "/E";
+                $msg = "Aspersores apagados";
             }
+
+            $aspersor->direccion = $orden;
+            $aspersor->save();
 
             return $response->withJson([
                 'error' => false,
                 'message' => $msg,
-                'payload' => "LT" . $orden,
+                'payload' => $args['id'] . $orden,
                 'siguiente' => $toggle,
-                'newState' => $luces
+                'newState' => $aspersor
             ], 200);
         }
         else{
             return $response->withJson([
                 'error' => true,
-                'message' => "error al encender",
+                'message' => "Ocurrieron errores",
                 'log' => $errors
             ], 400);
         }
     }
 
     // POST /pluz/{id}/{orden}
-    public function programarLuz(Request $request, Response $response, $args) {
+    public function programarAsp(Request $request, Response $response, $args) {
         $user = $request->getAttribute('user');
-        $this->logger->addInfo('Usuario '.$user->username.' programo la luz '.$args['id'].'. Accion: '.$args['orden']);
+        $this->logger->addInfo('Usuario '.$user->username.' programo el aspersor '.$args['id'].'. Accion: '.$args['orden']);
         $luz = $args['id'];
         $orden = $args['orden'];
         $data = $request->getParsedBody();
         $errors = [];
-
-        $arrLuces = ["LG","LP","LA","LB","LS","LC","LE"];
         
-        $luz = Luz::where('dkey',$args['id'])->first();
+        $luz = Aspersor::where('dkey',$args['id'])->first();
         //Vemos si la luz solicitada se encuentra entre las opciones disponibles
-        if(!$luz) $errors = ['Luz escogida no existe'];
+        if(!$luz) $errors = ['aspersor escogido no existe'];
 
         if($orden !== "E" && $orden !== "A") $errors = ['Orden invalida'];
 
         if(!isset($data['hora'])) $errors = ['por favor especifique una hora'];
 
         if(!$errors && !$this->is_timestamp($data['hora'])) $errors = ['ingrese un timestamp valido'];
-        //exec("mode COM2 BAUD=9600 PARITY=N data=8 stop=1 xon=off");
-        //$fp = @fopen ("COM2", "w+");
-
-        //if (!$fp) $errors = ["Puerto serial no accesible"];
 
         if(!$errors)
         {   
             $newEvento = Evento::create([
-                'tabla' => 'luces',
+                'tabla' => 'aspersores',
                 'dkey' => $args['id'],
                 'orden' => $orden,
                 'payload' => $args['id'] . $orden,
@@ -226,6 +170,6 @@ class LucesController {
         if(strtotime(date('d-m-Y H:i:s',$timestamp)) === (int)$timestamp) {
             return $timestamp;
         } else return false;
-    }
+    }    
     
 }
